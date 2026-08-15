@@ -1,26 +1,37 @@
-import logging
+import os
+from flask import Flask
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
+import threading
 
-# إعداد السجلات لمتابعة الأخطاء إن وجدت
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+TOKEN = "8947234227:AAGdoUk5VpFyAVzjHKRMqwiio68mfshLDeU"
 
-# دالة الترحيب عند إرسال /start
+# إنشاء تطبيق ويب بسيط لترضية سيرفرات Render
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is alive and running!"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("أهلاً بك! بوتك يعمل بنجاح 24/7 🎉")
+    await update.message.reply_text("أهلاً بك! بوتك يعمل بنجاح تام 24/7 🎉")
 
-if __name__ == '__main__':
-    # التوكن الخاص بك
-    TOKEN = "8947234227:AAGdoUk5VpFyAVzjHKRMqwiio68mfshLDeU"
-    
+def main():
+    # تشغيل سيرفر الويب في الخلفية
+    t = threading.Thread(target=run_flask)
+    t.start()
+
+    # تشغيل بوت تليجرام
     application = ApplicationBuilder().token(TOKEN).build()
-    
-    # ربط أمر /start بالدالة
     start_handler = CommandHandler('start', start)
     application.add_handler(start_handler)
     
-    print("Bot is running...")
     application.run_polling()
+
+if __name__ == '__main__':
+    main()
+
